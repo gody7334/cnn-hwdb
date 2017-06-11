@@ -32,11 +32,11 @@ def build_input(dataset, data_path, batch_size, mode):
   Raises:
     ValueError: when the specified dataset is not supported.
   """
-  image_size = 32
-  if dataset == 'cifar10':
-    label_bytes = 1
+  image_size = 64
+  if dataset == 'hwdb1':
+    label_bytes = 2
     label_offset = 0
-    num_classes = 10
+    num_classes = 3755
   elif dataset == 'cifar100':
     label_bytes = 1
     label_offset = 1
@@ -44,7 +44,7 @@ def build_input(dataset, data_path, batch_size, mode):
   else:
     raise ValueError('Not supported dataset %s', dataset)
 
-  depth = 3
+  depth = 1
   image_bytes = image_size * image_size * depth
   record_bytes = label_bytes + label_offset + image_bytes
 
@@ -55,18 +55,26 @@ def build_input(dataset, data_path, batch_size, mode):
   _, value = reader.read(file_queue)
 
   # Convert these examples to dense labels and processed images.
+  print(record_bytes)
+  print(tf.decode_raw(value, tf.int16).get_shape())
+
+  record = tf.decode_raw(value, tf.int16)
+  print(record.get_shape())
+  label = tf.cast(tf.slice(record, [label_offset], [1]), tf.int32)
+  
   record = tf.reshape(tf.decode_raw(value, tf.uint8), [record_bytes])
-  label = tf.cast(tf.slice(record, [label_offset], [label_bytes]), tf.int32)
   # Convert from string to [depth * height * width] to [depth, height, width].
   depth_major = tf.reshape(tf.slice(record, [label_bytes], [image_bytes]),
                            [depth, image_size, image_size])
   # Convert from [depth, height, width] to [height, width, depth].
   image = tf.cast(tf.transpose(depth_major, [1, 2, 0]), tf.float32)
+  print(image.get_shape())
+  print(label.get_shape())
 
   if mode == 'train':
     image = tf.image.resize_image_with_crop_or_pad(
         image, image_size+4, image_size+4)
-    image = tf.random_crop(image, [image_size, image_size, 3])
+    image = tf.random_crop(image, [image_size, image_size, depth])
     image = tf.image.random_flip_left_right(image)
     # Brightness/saturation/constrast provides small gains .2%~.5% on cifar.
     # image = tf.image.random_brightness(image, max_delta=63. / 255.)
@@ -91,6 +99,8 @@ def build_input(dataset, data_path, batch_size, mode):
         shapes=[[image_size, image_size, depth], [1]])
     num_threads = 1
 
+  print(image.get_shape())
+  print(label.get_shape())
   example_enqueue_op = example_queue.enqueue([image, label])
   tf.train.add_queue_runner(tf.train.queue_runner.QueueRunner(
       example_queue, [example_enqueue_op] * num_threads))
@@ -98,14 +108,16 @@ def build_input(dataset, data_path, batch_size, mode):
   # Read 'batch' labels + images from the example queue.
   images, labels = example_queue.dequeue_many(batch_size)
   labels = tf.reshape(labels, [batch_size, 1])
+  labels = tf.Print(labels, [labels], message="This is labels: ")
   indices = tf.reshape(tf.range(0, batch_size, 1), [batch_size, 1])
+  indices = tf.Print(indices, [indices], message="This is indices: ")
   labels = tf.sparse_to_dense(
       tf.concat(values=[indices, labels], axis=1),
       [batch_size, num_classes], 1.0, 0.0)
 
   assert len(images.get_shape()) == 4
   assert images.get_shape()[0] == batch_size
-  assert images.get_shape()[-1] == 3
+  assert images.get_shape()[-1] == 1
   assert len(labels.get_shape()) == 2
   assert labels.get_shape()[0] == batch_size
   assert labels.get_shape()[1] == num_classes

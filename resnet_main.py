@@ -19,7 +19,7 @@ import time
 import six
 import sys
 
-import cifar_input
+import hwdb_input
 import numpy as np
 import resnet_model
 import tensorflow as tf
@@ -31,7 +31,7 @@ tf.app.flags.DEFINE_string('train_data_path', '',
                            'Filepattern for training data.')
 tf.app.flags.DEFINE_string('eval_data_path', '',
                            'Filepattern for eval data')
-tf.app.flags.DEFINE_integer('image_size', 32, 'Image side length.')
+tf.app.flags.DEFINE_integer('image_size', 64, 'Image side length.')
 tf.app.flags.DEFINE_string('train_dir', '',
                            'Directory to keep training outputs.')
 tf.app.flags.DEFINE_string('eval_dir', '',
@@ -49,7 +49,7 @@ tf.app.flags.DEFINE_integer('num_gpus', 0,
 
 def train(hps):
   """Training loop."""
-  images, labels = cifar_input.build_input(
+  images, labels = hwdb_input.build_input(
       FLAGS.dataset, FLAGS.train_data_path, hps.batch_size, FLAGS.mode)
   model = resnet_model.ResNet(hps, images, labels, FLAGS.mode)
   model.build_graph()
@@ -185,8 +185,8 @@ def main(_):
   elif FLAGS.mode == 'eval':
     batch_size = 100
 
-  if FLAGS.dataset == 'cifar10':
-    num_classes = 10
+  if FLAGS.dataset == 'hwdb1':
+    num_classes = 3755
   elif FLAGS.dataset == 'cifar100':
     num_classes = 100
 
