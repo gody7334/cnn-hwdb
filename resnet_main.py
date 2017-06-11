@@ -31,7 +31,7 @@ tf.app.flags.DEFINE_string('train_data_path', '',
                            'Filepattern for training data.')
 tf.app.flags.DEFINE_string('eval_data_path', '',
                            'Filepattern for eval data')
-tf.app.flags.DEFINE_integer('image_size', 64, 'Image side length.')
+tf.app.flags.DEFINE_integer('image_size', 32, 'Image side length.')
 tf.app.flags.DEFINE_string('train_dir', '',
                            'Directory to keep training outputs.')
 tf.app.flags.DEFINE_string('eval_dir', '',
@@ -102,6 +102,8 @@ def train(hps):
       else:
         self._lrn_rate = 0.0001
 
+  config = tf.ConfigProto(allow_soft_placement=True)
+  config.gpu_options.allow_growth=True
   with tf.train.MonitoredTrainingSession(
       checkpoint_dir=FLAGS.log_root,
       hooks=[logging_hook, _LearningRateSetterHook()],
@@ -109,7 +111,7 @@ def train(hps):
       # Since we provide a SummarySaverHook, we need to disable default
       # SummarySaverHook. To do that we set save_summaries_steps to 0.
       save_summaries_steps=0,
-      config=tf.ConfigProto(allow_soft_placement=True)) as mon_sess:
+      config=config) as mon_sess:
     while not mon_sess.should_stop():
       mon_sess.run(model.train_op)
 
@@ -123,7 +125,9 @@ def evaluate(hps):
   saver = tf.train.Saver()
   summary_writer = tf.summary.FileWriter(FLAGS.eval_dir)
 
-  sess = tf.Session(config=tf.ConfigProto(allow_soft_placement=True))
+  config = tf.ConfigProto(allow_soft_placement=True)
+  config.gpu_options.allow_growth=True
+  sess = tf.Session(config=config)
   tf.train.start_queue_runners(sess)
 
   best_precision = 0.0

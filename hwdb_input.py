@@ -32,7 +32,7 @@ def build_input(dataset, data_path, batch_size, mode):
   Raises:
     ValueError: when the specified dataset is not supported.
   """
-  image_size = 64
+  image_size = 32
   if dataset == 'hwdb1':
     label_bytes = 2
     label_offset = 0
@@ -108,9 +108,9 @@ def build_input(dataset, data_path, batch_size, mode):
   # Read 'batch' labels + images from the example queue.
   images, labels = example_queue.dequeue_many(batch_size)
   labels = tf.reshape(labels, [batch_size, 1])
-  labels = tf.Print(labels, [labels], message="This is labels: ")
+  #labels = tf.Print(labels, [labels], message="This is labels: ")
   indices = tf.reshape(tf.range(0, batch_size, 1), [batch_size, 1])
-  indices = tf.Print(indices, [indices], message="This is indices: ")
+  #indices = tf.Print(indices, [indices], message="This is indices: ")
   labels = tf.sparse_to_dense(
       tf.concat(values=[indices, labels], axis=1),
       [batch_size, num_classes], 1.0, 0.0)
