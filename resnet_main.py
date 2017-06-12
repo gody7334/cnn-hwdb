@@ -45,6 +45,7 @@ tf.app.flags.DEFINE_string('log_root', '',
                            'parent directory of FLAGS.train_dir/eval_dir.')
 tf.app.flags.DEFINE_integer('num_gpus', 0,
                             'Number of gpus used for training. (0 or 1)')
+tf.app.flags.DEFINE_integer('num_residual_units', 5, 'Number of residual unit')
 
 
 def train(hps):
@@ -199,7 +200,7 @@ def main(_):
                              num_classes=num_classes,
                              min_lrn_rate=0.0001,
                              lrn_rate=0.1,
-                             num_residual_units=5,
+                             num_residual_units=FLAGS.num_residual_units,
                              use_bottleneck=False,
                              weight_decay_rate=0.0002,
                              relu_leakiness=0.1,
