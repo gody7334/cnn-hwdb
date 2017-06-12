@@ -118,7 +118,7 @@ def train(hps):
 
 def evaluate(hps):
   """Eval loop."""
-  images, labels = cifar_input.build_input(
+  images, labels = hwdb_input.build_input(
       FLAGS.dataset, FLAGS.eval_data_path, hps.batch_size, FLAGS.mode)
   model = resnet_model.ResNet(hps, images, labels, FLAGS.mode)
   model.build_graph()
@@ -139,6 +139,7 @@ def evaluate(hps):
       continue
     if not (ckpt_state and ckpt_state.model_checkpoint_path):
       tf.logging.info('No model to eval yet at %s', FLAGS.log_root)
+      time.sleep(60)
       continue
     tf.logging.info('Loading checkpoint %s', ckpt_state.model_checkpoint_path)
     saver.restore(sess, ckpt_state.model_checkpoint_path)

@@ -58,10 +58,12 @@ def build_input(dataset, data_path, batch_size, mode):
   print(record_bytes)
   print(tf.decode_raw(value, tf.int16).get_shape())
 
+  # TODO read category mod
   record = tf.decode_raw(value, tf.int16)
   print(record.get_shape())
   label = tf.cast(tf.slice(record, [label_offset], [1]), tf.int32)
   
+  # read image
   record = tf.reshape(tf.decode_raw(value, tf.uint8), [record_bytes])
   # Convert from string to [depth * height * width] to [depth, height, width].
   depth_major = tf.reshape(tf.slice(record, [label_bytes], [image_bytes]),
