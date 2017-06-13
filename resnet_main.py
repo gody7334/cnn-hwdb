@@ -146,7 +146,7 @@ def evaluate(hps):
     saver.restore(sess, ckpt_state.model_checkpoint_path)
 
     total_prediction, correct_prediction = 0, 0
-    for _ in six.moves.range(FLAGS.eval_batch_count):
+    for iter in six.moves.range(FLAGS.eval_batch_count):
       (summaries, loss, predictions, truth, train_step) = sess.run(
           [model.summaries, model.cost, model.predictions,
            model.labels, model.global_step])
@@ -155,6 +155,7 @@ def evaluate(hps):
       predictions = np.argmax(predictions, axis=1)
       correct_prediction += np.sum(truth == predictions)
       total_prediction += predictions.shape[0]
+      #tf.logging.info('iter: %d' % (iter))
 
     precision = 1.0 * correct_prediction / total_prediction
     best_precision = max(precision, best_precision)
@@ -189,7 +190,7 @@ def main(_):
   if FLAGS.mode == 'train':
     batch_size = 128
   elif FLAGS.mode == 'eval':
-    batch_size = 100
+    batch_size = 128
 
   if FLAGS.dataset == 'hwdb1':
     num_classes = 3755

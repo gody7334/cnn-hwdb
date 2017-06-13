@@ -1,3 +1,5 @@
+train, test = (897758, 223991)
+
 {45217: {'category': 1235, 'count': 300, 'w': u'\u554a'},
  45218: {'category': 1236, 'count': 300, 'w': u'\u963f'},
  45219: {'category': 1237, 'count': 299, 'w': u'\u57c3'},
