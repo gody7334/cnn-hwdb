@@ -36,8 +36,10 @@ tf.app.flags.DEFINE_string('train_dir', '',
                            'Directory to keep training outputs.')
 tf.app.flags.DEFINE_string('eval_dir', '',
                            'Directory to keep eval outputs.')
-tf.app.flags.DEFINE_integer('eval_batch_count', 50,
-                            'Number of batches to eval.')
+
+# tf.app.flags.DEFINE_integer('eval_batch_count', 50, 'Number of batches to eval.')
+tf.app.flags.DEFINE_integer('eval_batch_count', 1750, 'Number of batches to eval.')
+
 tf.app.flags.DEFINE_bool('eval_once', False,
                          'Whether evaluate the model only once.')
 tf.app.flags.DEFINE_string('log_root', '',
