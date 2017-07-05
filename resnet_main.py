@@ -23,6 +23,7 @@ import hwdb_input
 import numpy as np
 import resnet_model
 import tensorflow as tf
+from tensorflow.python import debug as tf_debug
 
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('dataset', 'hwdb1', 'hwdb1 or hwdb0.')
@@ -48,6 +49,9 @@ tf.app.flags.DEFINE_string('log_root', '',
 tf.app.flags.DEFINE_integer('num_gpus', 0,
                             'Number of gpus used for training. (0 or 1)')
 tf.app.flags.DEFINE_integer('num_residual_units', 5, 'Number of residual unit')
+
+tf.app.flags.DEFINE_bool('debug', False, 'Use debugger to track down bad values during training')
+tf.app.flags.DEFINE_string('ui_type', "curses", 'Command-line user interface type (curses | readline)')
 
 
 def train(hps):
@@ -115,6 +119,9 @@ def train(hps):
       # SummarySaverHook. To do that we set save_summaries_steps to 0.
       save_summaries_steps=0,
       config=config) as mon_sess:
+    if FLAGS.debug:
+      mon_sess = tf_debug.LocalCLIDebugWrapperSession(mon_sess, ui_type=FLAGS.ui_type)
+      mon_sess.add_tensor_filter("has_inf_or_nan", tf_debug.has_inf_or_nan)
     while not mon_sess.should_stop():
       mon_sess.run(model.train_op)
 
