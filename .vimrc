@@ -432,3 +432,5 @@ function! <SID>BufcloseCloseIt()
    endif
 endfunction
 
+hi TabLineSel ctermfg=Blue ctermbg=White
+hi TabLineFill ctermfg=Black ctermbg=Black
